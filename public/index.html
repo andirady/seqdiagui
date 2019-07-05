@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    main {
+      display: grid;
+      grid-template-columns: 40% auto;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    textarea {
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: 10px;
+    }
+
+    .error {
+      color: red;
+    }
+
+    div {
+      overflow: auto;
+    }
+  </style>
+  <main>
+    <textarea></textarea>
+    <div>
+      <img>
+    </div>
+  </main>
+  <script>
+    let source = document.getElementsByTagName('textarea')[0];
+    let output = document.getElementsByTagName('img')[0];
+
+    source.addEventListener('keyup', e => {
+      if (!e.ctrlKey && !e.metaKey) {
+        let box = output.parentElement;
+        fetch(`draw?w=${Math.floor(box.clientWidth)}&h=${Math.floor(box.clientHeight)}`, {
+          method: 'POST',
+          body: source.value
+        }).then(r => r.json())
+        .then(r => {
+          if (r.error) {
+            source.classList.add('error');
+          } else {
+            output.src = r.src;
+            source.classList.remove('error');
+          }
+        });
+      }
+    });
+    source.addEventListener('keydown', e => {
+      switch (e.keyCode) {
+        case 9: // tab
+          let v = source.value;
+          let i = source.selectionStart;
+          source.value = v.substr(0, i)
+                       + '  '
+                       + v.substring(i, v.length);
+          e.preventDefault();
+          i += 2
+          source.setSelectionRange(i, i);
+          break;
+        case 13: // enter
+          break;
+      }
+    })
+  </script>
+</html>
