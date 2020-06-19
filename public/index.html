@@ -3,36 +3,50 @@
   <style>
     main {
       display: grid;
-      grid-template-columns: 40% auto;
+      grid-template-columns: min-content 5px auto;
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
     }
+    main.resizing > * {
+      cursor: ew-resize;
+    }
 
     textarea {
       font-family: Consolas, 'Courier New', monospace;
       font-size: 10px;
+      resize: none;
     }
 
     .error {
       color: red;
     }
 
+    split-button {
+      display: block;
+      cursor: ew-resize;
+    }
+
     div {
       overflow: auto;
+      display: grid;
+      place-items: center;
     }
   </style>
   <main>
-    <textarea></textarea>
+    <textarea style="width:400px"></textarea>
+    <split-button></split-button>
     <div>
       <img>
     </div>
   </main>
   <script>
-    let source = document.getElementsByTagName('textarea')[0];
-    let output = document.getElementsByTagName('img')[0];
+    let main    = document.getElementsByTagName('main')[0];
+    let source  = document.getElementsByTagName('textarea')[0];
+    let output  = document.getElementsByTagName('img')[0];
+    let split   = document.getElementsByTagName('split-button')[0];
 
     source.addEventListener('keyup', e => {
       if (!e.ctrlKey && !e.metaKey) {
@@ -66,6 +80,23 @@
         case 13: // enter
           break;
       }
-    })
+    });
+
+    split.addEventListener('mousedown', e => {
+      main.classList.add('resizing');
+
+      let start = { x: e.clientX };
+      let listener = e => {
+        let diff = e.clientX - start.x;
+        let newWidth = parseInt(source.style.width) + diff + 'px';
+        source.style.width = newWidth;
+        start.x = e.clientX;
+      };
+      window.addEventListener('mousemove', listener);
+      window.addEventListener('mouseup', e => {
+        main.classList.remove('resizing');
+        window.removeEventListener('mousemove', listener);
+      }, { once: true });
+    });
   </script>
 </html>
